@@ -131,10 +131,10 @@ td.n{font:16px var(--f-lcd);color:var(--snake);width:2.5em}
 .fine{font-size:9px;color:var(--dim)}
 
 /* fan club */
-.fc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}
+.fc{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
 .fc-form{max-width:none}
-.fc-card{display:flex;flex-direction:column;gap:8px;align-items:center}
-#fc-canvas{width:100%;max-width:420px;aspect-ratio:640/404;height:auto;border-radius:12px;box-shadow:4px 6px 0 #000,0 0 0 1px #000}
+.fc-card{order:-1;display:flex;flex-direction:column;gap:8px;align-items:center}
+#fc-canvas{width:100%;max-width:600px;aspect-ratio:800/320;height:auto;filter:drop-shadow(4px 6px 0 rgba(0,0,0,.4))}
 .fc-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
 .btn98{background:linear-gradient(#d4d0c8,#9a978f);border:2px outset #e8e6e0;font:bold 11px var(--f-body);color:#111!important;padding:3px 12px;text-decoration:none}
 .btn98:hover{background:linear-gradient(#e4e0d8,#aaa79f)}
@@ -269,8 +269,8 @@ nav button.badge:hover{color:var(--link);border-color:var(--link)}
         <div class="bar">Join the Official Breakout Fan Club</div>
         <div class="pad fc">
           <div class="fc-copy">
-            <h2>Get your member card!</h2>
-            <p>Membership is free and totally official. Sign up and we'll print your card on the spot, with your own member number. Show it off.</p>
+            <h2>Get your boarding pass!</h2>
+            <p>Membership is free and totally official. Sign up and we'll print your boarding pass for Pacific Air Flight 121, Honolulu to Los Angeles, with your own seat and ticket number. Show it off.</p>
             <form class="submit fc-form" id="fc-form" name="fanclub" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
               <input type="hidden" name="form-name" value="fanclub"><input type="hidden" name="member" value="">
               <p class="gb-hp"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
@@ -279,14 +279,14 @@ nav button.badge:hover{color:var(--link);border-color:var(--link)}
               <label for="fc-email">Email <small>(never shown)</small></label>
               <input id="fc-email" name="email" type="email" maxlength="120" autocomplete="email" required placeholder="you@aol.com">
               <label class="chk" for="fc-optin"><input id="fc-optin" name="optin" type="checkbox" value="yes"> Email me when new episodes drop</label>
-              <button type="submit" id="fc-submit">Print my card</button>
+              <button type="submit" id="fc-submit">Print my boarding pass</button>
               <div class="submit-msg" id="fc-msg" aria-live="polite"></div>
             </form>
           </div>
           <div class="fc-card">
-            <canvas id="fc-canvas" width="640" height="404" aria-label="Fan club member card"></canvas>
+            <canvas id="fc-canvas" width="800" height="320" aria-label="Fan club boarding pass for Pacific Air Flight 121, Honolulu to Los Angeles"></canvas>
             <div class="fc-actions" id="fc-actions" hidden>
-              <a id="fc-save" class="btn98" href="#" download="breakout-fan-club-card.png">Save my card</a>
+              <a id="fc-save" class="btn98" href="#" download="breakout-boarding-pass.png">Save my boarding pass</a>
               <span class="fine">Or screenshot it and post it!</span>
             </div>
           </div>
@@ -457,66 +457,84 @@ var APPLE_PODCAST_URL='';
   var cv=document.getElementById('fc-canvas'),x=cv.getContext('2d'),W=cv.width,H=cv.height;
   var form=document.getElementById('fc-form'),msg=document.getElementById('fc-msg'),btn=document.getElementById('fc-submit'),
       actions=document.getElementById('fc-actions'),save=document.getElementById('fc-save');
-  var member={name:'YOUR NAME HERE',num:'000,000',date:'',sample:true};
+  var member={name:'YOUR NAME HERE',num:'000,000',date:'',seat:'--',sample:true};
   function qrTarget(){return APPLE_PODCAST_URL||'https://breakoutpod.com'}
   function memberNo(email){var h=2166136261;for(var i=0;i<email.length;i++){h^=email.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
     var n=1000+h%998000;return String(n).padStart(6,'0').replace(/(\d{3})(\d{3})/,'$1,$2')}
   function rr(px,py,w,h,r){x.beginPath();x.moveTo(px+r,py);x.arcTo(px+w,py,px+w,py+h,r);x.arcTo(px+w,py+h,px,py+h,r);x.arcTo(px,py+h,px,py,r);x.arcTo(px,py,px+w,py,r);x.closePath()}
+  function seatFor(email){var h=5381;for(var i=0;i<email.length;i++){h=(Math.imul(h,33)+email.charCodeAt(i))>>>0}
+    return (1+h%38)+'ABCDEF'.charAt((h>>>8)%6)}
+  function plane(cx,cy,s,col){x.save();x.translate(cx,cy);x.scale(s,s);x.fillStyle=col;x.beginPath();
+    x.moveTo(24,0);x.quadraticCurveTo(22,-3,16,-3);x.lineTo(4,-3);x.lineTo(-6,-19);x.lineTo(-12,-19);x.lineTo(-6,-3);x.lineTo(-17,-3);x.lineTo(-22,-9);x.lineTo(-26,-9);x.lineTo(-23,0);
+    x.lineTo(-26,9);x.lineTo(-22,9);x.lineTo(-17,3);x.lineTo(-6,3);x.lineTo(-12,19);x.lineTo(-6,19);x.lineTo(4,3);x.lineTo(16,3);x.quadraticCurveTo(22,3,24,0);x.fill();x.restore()}
+  function label(t,px,py,col){x.fillStyle=col||'#6b6455';x.font='bold 10px Verdana, sans-serif';x.fillText(t,px,py)}
+  function dot(t,px,py,size,col){x.fillStyle=col||(member.sample?'#a39d8d':'#1d1b17');x.font=size+'px VT323, Courier New, monospace';x.fillText(t,px,py)}
+  function fit(t,maxW,size,face){x.font=size+'px '+face;while(x.measureText(t).width>maxW&&size>12){size-=1;x.font=size+'px '+face}return size}
   function draw(){
-    x.clearRect(0,0,W,H);
-    rr(0,0,W,H,28);x.save();x.clip();
-    var g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#173d0c');g.addColorStop(.55,'#0b1f06');g.addColorStop(1,'#050c03');x.fillStyle=g;x.fillRect(0,0,W,H);
-    // snake-scale pattern
-    x.strokeStyle='rgba(124,207,46,.10)';x.lineWidth=2;
-    for(var row=0;row<14;row++)for(var col=0;col<22;col++){var cx=col*32+(row%2?16:0),cy=row*30;x.beginPath();x.arc(cx,cy,16,0,Math.PI);x.stroke()}
-    // top band
-    x.fillStyle='#ff3b1f';x.fillRect(0,0,W,64);
-    x.fillStyle='#fff';x.font='40px Anton, Impact, sans-serif';x.textBaseline='middle';x.fillText('BREAKOUT FAN CLUB',28,34);
-    x.font='bold 13px Verdana, sans-serif';x.textAlign='right';x.fillText('OFFICIAL MEMBER',W-28,34);x.textAlign='left';
-    // hologram sticker
-    var hx=88,hy=150,hr=52,hg=x.createLinearGradient(hx-hr,hy-hr,hx+hr,hy+hr);
-    ['#ff6ad5','#c774e8','#94d0ff','#8affc1','#fffb96','#ff6ad5'].forEach(function(c,i,a){hg.addColorStop(i/(a.length-1),c)});
-    x.fillStyle=hg;x.beginPath();x.arc(hx,hy,hr,0,7);x.fill();
-    x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=2;x.stroke();
-    x.save();x.globalAlpha=.25;x.fillStyle='#fff';for(var k=-60;k<60;k+=9){x.fillRect(hx+k,hy-hr,3,hr*2)}x.restore();
-    // snake on sticker
-    x.strokeStyle='#0b1f06';x.lineWidth=9;x.lineCap='round';x.beginPath();
-    for(var t=0;t<=1.0001;t+=.02){var sx=hx-36+t*72,sy=hy+Math.sin(t*Math.PI*2.2)*16;t?x.lineTo(sx,sy):x.moveTo(sx,sy)}x.stroke();
-    x.fillStyle='#0b1f06';x.beginPath();x.arc(hx+38,hy+Math.sin(2.2*Math.PI)*16,8,0,7);x.fill();
-    x.fillStyle='#ff3b1f';x.fillRect(hx+45,hy+Math.sin(2.2*Math.PI)*16-1,10,2);
-    x.font='bold 9px Verdana, sans-serif';x.fillStyle='#0b1f06';x.textAlign='center';x.fillText('AUTHENTIC',hx,hy-32);x.fillText('100% REAL',hx,hy+36);x.textAlign='left';
-    // name + details
-    x.fillStyle='#9bbc0f';x.font='bold 12px Verdana, sans-serif';x.fillText('MEMBER NAME',170,108);
-    x.fillStyle=member.sample?'rgba(255,255,255,.45)':'#fff';
-    var size=46;x.font=size+'px Anton, Impact, sans-serif';while(x.measureText(member.name.toUpperCase()).width>270&&size>22){size-=2;x.font=size+'px Anton, Impact, sans-serif'}
-    x.fillText(member.name.toUpperCase(),170,146);
-    x.fillStyle='#9bbc0f';x.font='bold 12px Verdana, sans-serif';x.fillText('MEMBER NO.',170,196);x.fillText('MEMBER SINCE',170,262);
-    x.fillStyle='#ffcc00';x.font='38px VT323, Courier New, monospace';x.fillText('#'+member.num,170,228);
-    x.fillStyle='#fff';x.fillText(member.date||'--.--.--',170,292);
-    // QR
-    var q=qrcode(0,'M');q.addData(qrTarget());q.make();var n=q.getModuleCount(),box=150,qx=W-box-34,qy=96,cell=(box-16)/n;
-    x.fillStyle='#fff';rr(qx,qy,box,box,8);x.fill();x.fillStyle='#000';
-    for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(q.isDark(r,c))x.fillRect(Math.floor(qx+8+c*cell),Math.floor(qy+8+r*cell),Math.ceil(cell),Math.ceil(cell));
-    x.fillStyle='#fff';x.font='bold 12px Verdana, sans-serif';x.textAlign='center';x.fillText(APPLE_PODCAST_URL?'SCAN TO LISTEN':'SCAN ME',qx+box/2,qy+box+18);x.textAlign='left';
-    // magstripe footer
-    x.fillStyle='#000';x.fillRect(0,H-58,W,58);
-    x.fillStyle='#8c8c8c';x.font='bold 11px Verdana, sans-serif';x.fillText('BREAKOUTPOD.COM  •  How Snakes on a Plane became the first viral movie',28,H-26);
+    var TEAL='#0f4c5c',TEAL2='#0b3a47',CORAL='#e8603c',PAPER='#f7f3e8',SX=592;
+    x.clearRect(0,0,W,H);x.textBaseline='alphabetic';x.textAlign='left';
+    // paper with stub notches
+    rr(0,0,W,H,14);x.fillStyle=PAPER;x.fill();
+    x.save();rr(0,0,W,H,14);x.clip();
+    // faint watermark
+    x.save();x.globalAlpha=.06;x.strokeStyle=TEAL;x.lineWidth=26;x.lineCap='round';x.beginPath();
+    for(var t=0;t<=1.0001;t+=.02){var wx=40+t*520,wy=205+Math.sin(t*Math.PI*3)*42;t?x.lineTo(wx,wy):x.moveTo(wx,wy)}x.stroke();
+    x.fillStyle=TEAL;x.font='150px Anton, Impact, sans-serif';x.fillText('121',300,300);x.restore();
+    // header bands
+    x.fillStyle=TEAL;x.fillRect(0,0,SX,62);x.fillStyle=TEAL2;x.fillRect(SX,0,W-SX,62);
+    x.fillStyle=CORAL;x.fillRect(0,62,W,5);
+    // airline mark: sun over waves
+    x.fillStyle=CORAL;x.beginPath();x.arc(46,34,15,Math.PI,0);x.fill();
+    x.strokeStyle='#fff';x.lineWidth=3;for(var k=0;k<2;k++){x.beginPath();for(var j=0;j<=36;j++){var ax=28+j,ay=38+k*7+Math.sin(j/36*Math.PI*2)*2.5;j?x.lineTo(ax,ay):x.moveTo(ax,ay)}x.stroke()}
+    x.fillStyle='#fff';x.font='italic 32px Anton, Impact, sans-serif';x.fillText('PACIFIC AIR',74,45);
+    x.textAlign='right';x.font='bold 13px Verdana, sans-serif';x.fillText('BOARDING PASS',SX-24,30);
+    x.font='bold 10px Verdana, sans-serif';x.fillStyle='#ffd2c4';x.fillText('BREAKOUT FAN CLUB CLASS',SX-24,47);
+    x.fillStyle='#fff';x.font='bold 11px Verdana, sans-serif';x.textAlign='center';x.fillText('BOARDING PASS',SX+(W-SX)/2,36);x.textAlign='left';
+    // passenger
+    label('PASSENGER NAME',28,92);
+    var nm=member.name.toUpperCase();dot(nm,28,124,fit(nm,360,36,'VT323, Courier New, monospace'));
+    // route
+    label('FROM',28,154);label('TO',258,154);
+    x.fillStyle='#1d1b17';x.font='64px Anton, Impact, sans-serif';x.fillText('HNL',26,220);x.fillText('LAX',256,220);
+    x.fillStyle='#4a4437';x.font='bold 11px Verdana, sans-serif';x.fillText('HONOLULU, HI',28,240);x.fillText('LOS ANGELES, CA',258,240);
+    x.strokeStyle='#b9b09b';x.lineWidth=2;x.setLineDash([5,5]);x.beginPath();x.moveTo(146,196);x.lineTo(236,196);x.stroke();x.setLineDash([]);
+    plane(192,196,.9,CORAL);
+    // detail grid
+    var gx=[404,488],gy=[92,152,212];
+    var cells=[['FLIGHT','121'],['DATE',member.date||'--.--.--'],['GATE','S1'],['SEAT',member.seat],['BOARDS','NOW'],['ZONE','SSS']];
+    cells.forEach(function(c,i){var cx=gx[i%2],cy=gy[Math.floor(i/2)];label(c[0],cx,cy);dot(c[1],cx,cy+28,28,(c[0]==='SEAT'&&!member.sample)?CORAL:null)});
+    // barcode
+    var seed=0;for(var i=0;i<member.num.length;i++)seed=(seed*31+member.num.charCodeAt(i))>>>0;
+    x.fillStyle='#1d1b17';var bx=28;while(bx<380){seed=(Math.imul(seed,1103515245)+12345)>>>0;var bw=1+(seed>>>16)%3;x.fillRect(bx,262,bw,30);bx+=bw+1+((seed>>>20)%2)}
+    label('TICKET NO.',404,272);dot('#'+member.num,404,298,28);
+    x.fillStyle='#8a8372';x.font='9px Verdana, sans-serif';x.fillText('SNAKES MAY BE PRESENT ON THIS FLIGHT  •  BREAKOUTPOD.COM',28,H-12);
+    // stub
+    var q=qrcode(0,'M');q.addData(qrTarget());q.make();var n=q.getModuleCount(),box=104,qx=SX+(W-SX-box)/2,qy=78,cell=(box-12)/n;
+    x.fillStyle='#fff';x.fillRect(qx,qy,box,box);x.strokeStyle='#d6cfbd';x.lineWidth=1;x.strokeRect(qx+.5,qy+.5,box-1,box-1);x.fillStyle='#000';
+    for(var r=0;r<n;r++)for(var c2=0;c2<n;c2++)if(q.isDark(r,c2))x.fillRect(Math.floor(qx+6+c2*cell),Math.floor(qy+6+r*cell),Math.ceil(cell),Math.ceil(cell));
+    x.textAlign='center';x.fillStyle=CORAL;x.font='bold 10px Verdana, sans-serif';x.fillText(APPLE_PODCAST_URL?'SCAN TO LISTEN':'SCAN ME',SX+(W-SX)/2,qy+box+15);
+    x.textAlign='left';var sx0=SX+22;
+    label('PASSENGER',sx0,226);dot(nm,sx0,248,fit(nm,W-SX-44,24,'VT323, Courier New, monospace'));
+    x.fillStyle='#1d1b17';x.font='24px Anton, Impact, sans-serif';x.fillText('HNL',sx0,280);plane(sx0+78,272,.45,CORAL);x.fillText('LAX',sx0+100,280);
+    label('FLT 121',sx0,302);label('SEAT '+member.seat,sx0+86,302,member.sample?null:CORAL);
     x.restore();
-    x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;rr(1,1,W-2,H-2,28);x.stroke();
+    // perforation + notches
+    x.strokeStyle='#c4bba6';x.lineWidth=2;x.setLineDash([4,5]);x.beginPath();x.moveTo(SX,16);x.lineTo(SX,H-16);x.stroke();x.setLineDash([]);
+    x.save();x.globalCompositeOperation='destination-out';x.beginPath();x.arc(SX,0,12,0,7);x.arc(SX,H,12,0,7);x.fill();x.restore();
     try{save.href=cv.toDataURL('image/png')}catch(e){}
   }
   form.addEventListener('submit',function(e){
     e.preventDefault();
     var name=document.getElementById('fc-name').value.trim(),email=document.getElementById('fc-email').value.trim(),optin=document.getElementById('fc-optin').checked;
     function fail(t){msg.textContent=t;msg.className='submit-msg err'}
-    if(!name)return fail('Put a name on your card.');
+    if(!name)return fail('Put a name on your boarding pass.');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return fail('Enter a valid email address.');
-    var d=new Date();member={name:name,num:memberNo(email.toLowerCase()),date:String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'.06',sample:false};
-    draw();actions.hidden=false;msg.className='submit-msg';msg.textContent='Welcome to the club, '+name+'!';
+    var d=new Date();member={name:name,num:memberNo(email.toLowerCase()),date:String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'.06',seat:seatFor(email.toLowerCase()),sample:false};
+    draw();actions.hidden=false;msg.className='submit-msg';msg.textContent='Welcome aboard, '+name+'! You\'re in seat '+member.seat+'.';
     btn.disabled=true;
     netlifySubmit('fanclub',{name:name,email:email,member:member.num,optin:optin?'yes':'no','bot-field':form.elements['bot-field'].value})
       .then(function(){btn.disabled=false})
-      .catch(function(){btn.disabled=false;msg.textContent='Your card is ready, but we could not save your signup. Try again.';msg.className='submit-msg err'});
+      .catch(function(){btn.disabled=false;msg.textContent='Your boarding pass is ready, but we could not save your signup. Try again.';msg.className='submit-msg err'});
   });
   draw();
   if(document.fonts)document.fonts.ready.then(draw);
