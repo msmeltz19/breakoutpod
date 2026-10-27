@@ -215,6 +215,30 @@ footer nav a{font-weight:bold;text-decoration:none}
   .ticker p,.blink,.head.talking canvas,.amp-marquee span{animation:none}
   .ticker p,.amp-marquee span{padding-left:8px}
 }
+
+/* guestbook popup (fixed retro look in both themes) */
+.gb{color-scheme:light;padding:0;border:2px outset #e8e6e0;background:#d4d0c8;color:#111;width:min(380px,calc(100vw - 32px));max-height:calc(100% - 32px);overflow:auto;box-shadow:4px 4px 0 rgba(0,0,0,.5);font:11px/1.4 Verdana,Tahoma,sans-serif}
+.gb::backdrop{background:rgba(0,0,0,.55)}
+.gb-title{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#0a246a,#3a6ea5);color:#fff;font-weight:bold;padding:3px 4px 3px 8px}
+.gb-x{width:20px;height:18px;padding:0;line-height:12px;background:#d4d0c8;border:2px outset #fff;font:bold 12px Verdana,sans-serif;color:#111;cursor:pointer}
+.gb-body{display:flex;flex-direction:column;gap:3px;padding:12px}
+.gb-head{font:22px/1.1 "Comic Sans MS","Chalkboard SE",cursive;color:#0a246a}
+.gb-intro{margin:0 0 6px;color:#333;max-width:none}
+.gb label{font-weight:bold;color:#111}
+.gb label small{font-weight:normal;color:#555}
+.gb input:not([type=checkbox]):not([type=hidden]),.gb textarea{background:#fff;color:#000;border:2px inset #999;font:12px Verdana,sans-serif;padding:3px 5px;margin-bottom:4px;width:100%;box-sizing:border-box}
+.gb textarea{resize:vertical}
+.gb .gb-chk{display:flex;gap:6px;align-items:center;font-weight:normal;margin:2px 0 8px}
+.gb-btns{display:flex;gap:6px}
+.gb-btns button{background:#d4d0c8;border:2px outset #fff;font:bold 11px Verdana,sans-serif;color:#111;padding:3px 14px;cursor:pointer}
+.gb-btns button:active{border-style:inset}
+.gb-btns button[disabled]{opacity:.6;cursor:wait}
+.gb-status{min-height:1.4em;font-weight:bold;color:#0a6a1a}
+.gb-status.err{color:#b00}
+.gb-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.gb88{width:88px;height:31px;border:1px solid #000;background:linear-gradient(#ffe066,#c9a227);font:bold 8px/1.1 Verdana,sans-serif;color:#1b3768;cursor:pointer;padding:0}
+.gb-mini{display:block;width:calc(100% - 16px);margin:8px 8px 0;padding:6px;background:var(--panel);border:1px dashed var(--line-dk);font:bold 10px var(--f-body);color:var(--navy);cursor:pointer;text-align:left}
+.gb-mini:hover{color:var(--hot);border-color:var(--hot)}
 </style>
 </head>
 <body>
@@ -323,12 +347,14 @@ footer nav a{font-weight:bold;text-decoration:none}
           <div class="fc-copy">
             <h2>Get your member card!</h2>
             <p>Membership is free and totally official. Sign up and we'll print your card on the spot, with your own member number. Show it off.</p>
-            <form class="submit fc-form" id="fc-form" novalidate>
+            <form class="submit fc-form" id="fc-form" name="fanclub" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+              <input type="hidden" name="form-name" value="fanclub"><input type="hidden" name="member" value="">
+              <p class="gb-hp"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
               <label for="fc-name">Name on card <small>(username is fine)</small></label>
-              <input id="fc-name" maxlength="16" autocomplete="nickname" required placeholder="SnakeHater2006">
+              <input id="fc-name" name="name" maxlength="16" autocomplete="nickname" required placeholder="SnakeHater2006">
               <label for="fc-email">Email <small>(never shown)</small></label>
-              <input id="fc-email" type="email" maxlength="120" autocomplete="email" required placeholder="you@aol.com">
-              <label class="chk" for="fc-optin"><input id="fc-optin" type="checkbox"> Email me when new episodes drop</label>
+              <input id="fc-email" name="email" type="email" maxlength="120" autocomplete="email" required placeholder="you@aol.com">
+              <label class="chk" for="fc-optin"><input id="fc-optin" name="optin" type="checkbox" value="yes"> Email me when new episodes drop</label>
               <button type="submit" id="fc-submit">Print my card</button>
               <div class="submit-msg" id="fc-msg" aria-live="polite"></div>
             </form>
@@ -400,15 +426,37 @@ footer nav a{font-weight:bold;text-decoration:none}
     <aside class="rail">
       <div class="rbox">
         <div class="rhead"><svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3 17c0-4 5-4 8-4s7-1 7-4-4-4-6-4-5-1-5-3" fill="none" stroke="#1b3768" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="2.5" r="2.2" fill="#1b3768"/></svg><span>bp<b>club</b></span></div>
+        <button type="button" class="gb-open gb-mini">&#9998; Sign our guestbook! <span class="blink">NEW!</span></button>
         <a class="club-mini" href="#fanclub"><b>FAN CLUB</b>Get your official member card. Free! <span class="blink">NEW!</span></a>
       </div>
 
       <div class="rbox">
         <div class="counter">you are visitor #<div class="digits" id="digits"></div></div>
-        <div class="badge88"><span>MADE WITH<br>NOTEPAD</span><span>SNAKE<br>WEBRING</span></div>
+        <div class="badge88"><span>MADE WITH<br>NOTEPAD</span><span>SNAKE<br>WEBRING</span><button type="button" class="gb-open gb88">SIGN OUR<br>GUESTBOOK!</button></div>
       </div>
     </aside>
   </div>
+
+<dialog class="gb" id="gb" aria-labelledby="gb-title">
+  <div class="gb-title"><span id="gb-title">Guestbook.exe</span><button type="button" class="gb-x" id="gb-close" aria-label="Close">&times;</button></div>
+  <form class="gb-body" id="gb-form" name="guestbook" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+    <input type="hidden" name="form-name" value="guestbook">
+    <p class="gb-hp"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+    <div class="gb-head">Sign our guestbook!</div>
+    <p class="gb-intro">Thanks for stopping by! Leave your mark below.</p>
+    <label for="gb-name">Name</label>
+    <input id="gb-name" name="name" maxlength="40" autocomplete="nickname" placeholder="SnakeHater2006">
+    <label for="gb-email">Email <small>(never shown)</small></label>
+    <input id="gb-email" name="email" type="email" maxlength="120" autocomplete="email" required placeholder="you@aol.com">
+    <label for="gb-from">Where are you from? <small>(optional)</small></label>
+    <input id="gb-from" name="location" maxlength="60" placeholder="Row 34, seat C">
+    <label for="gb-msg">Message <small>(optional)</small></label>
+    <textarea id="gb-msg" name="message" rows="3" maxlength="500" placeholder="Cool site!!! Will visit again"></textarea>
+    <label class="gb-chk" for="gb-optin"><input id="gb-optin" name="optin" type="checkbox" value="yes"> Email me when new episodes drop</label>
+    <div class="gb-btns"><button type="submit" id="gb-submit">Sign it!</button><button type="button" id="gb-cancel">Cancel</button></div>
+    <div class="gb-status" id="gb-status" aria-live="polite"></div>
+  </form>
+</dialog>
 
   <footer>
     <nav><a href="#top">Home</a> &middot; <a href="#trailer">Trailer</a> &middot; <a href="#snake">Snake Game</a> &middot; <a href="#fanclub">Fan Club</a> &middot; <a href="#webmasters">Webmasters</a></nav>
@@ -465,9 +513,12 @@ var TRAILER_SRC='';
   au.addEventListener('timeupdate',function(){time.textContent=fmt(au.currentTime);if(au.duration)seek.value=au.currentTime/au.duration*1000});
 })();
 
-/* ---------- signups ----------
-   Paste the Apps Script web app URL here after deploying it. */
-var SIGNUP_URL='';
+/* ---------- signups (saved by Netlify Forms on the live site) ---------- */
+function netlifySubmit(formName,data){
+  var body=new URLSearchParams(Object.assign({'form-name':formName},data)).toString();
+  return fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){if(!r.ok)throw new Error('status '+r.status);return r});
+}
 
 /* ---------- fan club card ----------
    Put the Apple Podcasts link here when it exists. Until then the QR code opens the site. */
@@ -532,15 +583,39 @@ var APPLE_PODCAST_URL='';
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return fail('Enter a valid email address.');
     var d=new Date();member={name:name,num:memberNo(email.toLowerCase()),date:String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'.06',sample:false};
     draw();actions.hidden=false;msg.className='submit-msg';msg.textContent='Welcome to the club, '+name+'!';
-    if(SIGNUP_URL){btn.disabled=true;
-      fetch(SIGNUP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'fanclub',username:name,email:email,member:member.num,optin:optin})})
-        .then(function(r){return r.json()}).then(function(){btn.disabled=false}).catch(function(){btn.disabled=false});
-    }
+    btn.disabled=true;
+    netlifySubmit('fanclub',{name:name,email:email,member:member.num,optin:optin?'yes':'no','bot-field':form.elements['bot-field'].value})
+      .then(function(){btn.disabled=false})
+      .catch(function(){btn.disabled=false;msg.textContent='Your card is ready, but we could not save your signup. Try again.';msg.className='submit-msg err'});
   });
   draw();
   if(document.fonts)document.fonts.ready.then(draw);
 })();
 
+
+/* ---------- guestbook popup ---------- */
+(function(){
+  var dlg=document.getElementById('gb'),form=document.getElementById('gb-form'),st=document.getElementById('gb-status'),btn=document.getElementById('gb-submit');
+  function val(id){return document.getElementById(id).value.trim()}
+  function open(){st.textContent='';st.className='gb-status';btn.disabled=false;
+    if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+    setTimeout(function(){document.getElementById('gb-name').focus()},50)}
+  function close(){if(dlg.close)dlg.close();else dlg.removeAttribute('open')}
+  document.querySelectorAll('.gb-open').forEach(function(b){b.addEventListener('click',open)});
+  document.getElementById('gb-close').addEventListener('click',close);
+  document.getElementById('gb-cancel').addEventListener('click',close);
+  dlg.addEventListener('click',function(e){if(e.target===dlg)close()});
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var email=val('gb-email');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){st.textContent='Enter a valid email address.';st.className='gb-status err';return}
+    btn.disabled=true;st.className='gb-status';st.textContent='Signing...';
+    netlifySubmit('guestbook',{name:val('gb-name'),email:email,location:val('gb-from'),message:val('gb-msg'),
+      optin:document.getElementById('gb-optin').checked?'yes':'no','bot-field':form.elements['bot-field'].value})
+      .then(function(){st.textContent='Thanks for signing! You rule.';form.reset();setTimeout(close,1800)})
+      .catch(function(){btn.disabled=false;st.textContent='Could not send. Try again in a minute.';st.className='gb-status err'});
+  });
+})();
 
 /* ---------- talking heads ----------
    Swap each entry for a real interview subject: name, role, color, quotes.
@@ -651,5 +726,6 @@ TALKERS.forEach(function(t,i){
   if(document.fonts)document.fonts.ready.then(draw);
 })();
 </script>
+
 </body>
 </html>
