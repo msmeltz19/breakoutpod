@@ -520,7 +520,7 @@ function netlifySubmit(formName,data){
     .then(function(r){if(!r.ok)throw new Error('status '+r.status);return r});
 }
 /* Google Sheet copy: paste the Apps Script web app URL (ends in /exec) here. */
-var SHEET_URL='';
+var SHEET_URL='https://script.google.com/macros/s/AKfycbwH2yO1WOhR4yXdviWMwBSTA73bWpkaVgGYxmVrWnov9hQFpeW3r2yjvnW98WfQklO_yA/exec';
 function saveSignup(formName,data){
   var toSheet=SHEET_URL?fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
     body:JSON.stringify(Object.assign({source:formName},data))}).then(function(){return true},function(){return false}):Promise.resolve(false);
