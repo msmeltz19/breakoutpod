@@ -272,7 +272,7 @@ nav button.badge:hover{color:var(--link);border-color:var(--link)}
             <h2>Get your boarding pass!</h2>
             <p>Membership is free and totally official. Sign up and we'll print your boarding pass for Pacific Air Flight 121, Honolulu to Los Angeles, with your own seat and ticket number. Show it off.</p>
             <form class="submit fc-form" id="fc-form" name="fanclub" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
-              <input type="hidden" name="form-name" value="fanclub"><input type="hidden" name="member" value="">
+              <input type="hidden" name="form-name" value="fanclub"><input type="hidden" name="member" value=""><input type="hidden" name="seat" value="">
               <p class="gb-hp"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
               <label for="fc-name">Name on card <small>(username is fine)</small></label>
               <input id="fc-name" name="name" maxlength="16" autocomplete="nickname" required placeholder="SnakeHater2006">
@@ -449,6 +449,14 @@ function netlifySubmit(formName,data){
   return fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
     .then(function(r){if(!r.ok)throw new Error('status '+r.status);return r});
 }
+/* Google Sheet copy: paste the Apps Script web app URL (ends in /exec) here. */
+var SHEET_URL='';
+function saveSignup(formName,data){
+  var toSheet=SHEET_URL?fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(Object.assign({source:formName},data))}).then(function(){return true},function(){return false}):Promise.resolve(false);
+  var toNetlify=netlifySubmit(formName,data).then(function(){return true},function(){return false});
+  return Promise.all([toSheet,toNetlify]).then(function(r){if(!r[0]&&!r[1])throw new Error('not saved')});
+}
 
 /* ---------- fan club card ----------
    Put the Apple Podcasts link here when it exists. Until then the QR code opens the site. */
@@ -532,7 +540,7 @@ var APPLE_PODCAST_URL='';
     var d=new Date();member={name:name,num:memberNo(email.toLowerCase()),date:String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'.06',seat:seatFor(email.toLowerCase()),sample:false};
     draw();actions.hidden=false;msg.className='submit-msg';msg.textContent='Welcome aboard, '+name+'! You\'re in seat '+member.seat+'.';
     btn.disabled=true;
-    netlifySubmit('fanclub',{name:name,email:email,member:member.num,optin:optin?'yes':'no','bot-field':form.elements['bot-field'].value})
+    saveSignup('fanclub',{name:name,email:email,member:member.num,seat:member.seat,optin:optin?'yes':'no','bot-field':form.elements['bot-field'].value})
       .then(function(){btn.disabled=false})
       .catch(function(){btn.disabled=false;msg.textContent='Your boarding pass is ready, but we could not save your signup. Try again.';msg.className='submit-msg err'});
   });
@@ -558,7 +566,7 @@ var APPLE_PODCAST_URL='';
     var email=val('gb-email');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){st.textContent='Enter a valid email address.';st.className='gb-status err';return}
     btn.disabled=true;st.className='gb-status';st.textContent='Signing...';
-    netlifySubmit('guestbook',{name:val('gb-name'),email:email,location:val('gb-from'),message:val('gb-msg'),
+    saveSignup('guestbook',{name:val('gb-name'),email:email,location:val('gb-from'),message:val('gb-msg'),
       optin:document.getElementById('gb-optin').checked?'yes':'no','bot-field':form.elements['bot-field'].value})
       .then(function(){st.textContent='Thanks for signing! You rule.';form.reset();setTimeout(close,1800)})
       .catch(function(){btn.disabled=false;st.textContent='Could not send. Try again in a minute.';st.className='gb-status err'});
