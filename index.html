@@ -455,7 +455,10 @@ function saveSignup(formName,data){
   var toSheet=SHEET_URL?fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
     body:JSON.stringify(Object.assign({source:formName},data))}).then(function(){return true},function(){return false}):Promise.resolve(false);
   var toNetlify=netlifySubmit(formName,data).then(function(){return true},function(){return false});
-  return Promise.all([toSheet,toNetlify]).then(function(r){if(!r[0]&&!r[1])throw new Error('not saved')});
+  /* beehiiv newsletter: only people who ticked "Email me when new episodes drop" */
+  var toNews=data.optin==='yes'?fetch('/.netlify/functions/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({source:formName},data))}).then(function(r){return r.ok},function(){return false}):Promise.resolve(false);
+  return Promise.all([toSheet,toNetlify,toNews]).then(function(r){if(!r[0]&&!r[1]&&!r[2])throw new Error('not saved')});
 }
 
 /* ---------- fan club card ----------
